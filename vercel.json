@@ -1,0 +1,27 @@
+{
+  "crons": [
+    {
+      "path": "/api/email/check",
+      "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/trello/sync",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/reports/weekly",
+      "schedule": "0 11 * * 1"
+    }
+  ],
+  "functions": {
+    "src/app/api/email/check/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/orders/[id]/reprocess/route.ts": {
+      "maxDuration": 120
+    },
+    "src/app/api/reports/weekly/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
