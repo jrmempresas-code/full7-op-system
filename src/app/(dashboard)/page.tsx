@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import {
   Package, AlertTriangle, CheckCircle, Truck,
-  Clock, DollarSign, Layers, Settings,
+  Clock, DollarSign, Layers, Settings, Pencil,
 } from 'lucide-react'
 import { getDashboardStats, getOrders, getUpcomingDeliveries } from '@/lib/supabase/client'
 import StatsCard from '@/components/dashboard/StatsCard'
@@ -87,7 +87,7 @@ async function DashboardContent() {
       getDashboardStats(),
       getOrders({ status: 'atrasado' }),
       getOrders({ urgencia: true }),
-      getUpcomingDeliveries(7),
+      getUpcomingDeliveries(30),
       getOrders({ status: 'pronto' }),
       getOrders({ status: 'incompleto' }),
     ])
@@ -147,9 +147,12 @@ async function DashboardContent() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Truck size={16} className="text-gray-500" />
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Entregas nos Próximos 7 Dias ({entregas.length})</h2>
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Entregas nos Próximos 30 Dias ({entregas.length})</h2>
           </div>
-          <OrdersTable orders={entregas} />
+          <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+            <Pencil size={10} /> Clique na data para editar
+          </p>
+          <OrdersTable orders={entregas} editable />
         </div>
 
         {incompletos.length > 0 && (

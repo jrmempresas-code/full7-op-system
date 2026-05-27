@@ -24,11 +24,11 @@ export async function getOrders(filters?: {
   numeroPedido?: string
   dataInicio?: string
   dataFim?: string
-}): Promise<Order[]> {
+}, sortDirection: 'asc' | 'desc' = 'desc'): Promise<Order[]> {
   let query = supabaseAdmin
     .from('orders')
     .select('*, order_sizes(*)')
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: sortDirection === 'asc' })
 
   if (filters?.status)        query = query.eq('status', filters.status)
   if (filters?.urgencia)      query = query.eq('urgencia', true)

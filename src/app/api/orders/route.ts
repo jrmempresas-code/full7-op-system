@@ -28,8 +28,10 @@ export async function GET(req: NextRequest) {
     const dataFim = searchParams.get('data_fim')
     if (dataFim) filters.dataFim = dataFim
 
+    const sort = searchParams.get('sort') // 'created_at_asc' | default desc
+
     const [orders, stats] = await Promise.all([
-      getOrders(filters as Parameters<typeof getOrders>[0]),
+      getOrders(filters as Parameters<typeof getOrders>[0], sort === 'created_at_asc' ? 'asc' : 'desc'),
       searchParams.get('stats') === 'true' ? getDashboardStats() : null,
     ])
 

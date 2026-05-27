@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Search, Filter, RefreshCw } from 'lucide-react'
 import OrdersTable from '@/components/dashboard/OrdersTable'
-import { StatusBadge } from '@/components/ui/Badge'
 import type { Order, OrderStatus } from '@/types'
 import { ORDER_STATUS_LABELS } from '@/types'
 
@@ -13,37 +12,36 @@ const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
 ]
 
 export default function PedidosPage() {
-  const [orders, setOrders]       = useState<Order[]>([])
-  const [loading, setLoading]     = useState(true)
-  const [search, setSearch]       = useState('')
-  const [status, setStatus]       = useState('')
-  const [urgencia, setUrgencia]   = useState(false)
-  const [dataInicio, setDataInicio] = useState('')
-  const [dataFim, setDataFim]     = useState('')
+  const [orders, setOrders]     = useState<Order[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [search, setSearch]     = useState('')
+  const [status, setStatus]     = useState('')
+  const [urgencia, setUrgencia] = useState(false)
 
   const fetchOrders = useCallback(async () => {
     setLoading(true)
     const params = new URLSearchParams()
-    if (status)     params.set('status', status)
-    if (urgencia)   params.set('urgencia', 'true')
-    if (search)     params.set('cliente', search)
-    if (dataInicio) params.set('data_inicio', dataInicio)
-    if (dataFim)    params.set('data_fim', dataFim)
+    if (status)   params.set('status', status)
+    if (urgencia) params.set('urgencia', 'true')
+    if (search)   params.set('cliente', search)
+    // ordenação por chegada: mais antigo primeiro (order of arrival)
+    params.set('sort', 'created_at_asc')
 
-    const res = await fetch(`/api/orders?${params}`)
+    const res  = await fetch(`/api/orders?${params}`)
     const data = await res.json()
     setOrders(data.orders ?? [])
     setLoading(false)
-  }, [status, urgencia, search, dataInicio, dataFim])
+  }, [status, urgencia, search])
 
-  useEffect(() => {
-    fetchOrders()
-  }, [fetchOrders])
+  useEffect(() => { fetchOrders() }, [fetchOrders])
 
   return (
     <div className="p-6 space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Todos os Pedidos</h1>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Todos os Pedidos</h1>
+          <p className="text-xs text-gray-400 mt-0.5">Ordenado por ordem de chegada da OP</p>
+        </div>
         <button onClick={fetchOrders} className="btn-secondary flex items-center gap-2 text-sm">
           <RefreshCw size={14} />
           Atualizar
@@ -56,8 +54,8 @@ export default function PedidosPage() {
           <Filter size={14} />
           Filtros
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="relative lg:col-span-1">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="relative sm:col-span-1">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               className="input pl-8"
@@ -73,31 +71,16 @@ export default function PedidosPage() {
             ))}
           </select>
 
-          <input
-            type="date"
-            className="input"
-            placeholder="Data início"
-            value={dataInicio}
-            onChange={(e) => setDataInicio(e.target.value)}
-          />
-          <input
-            type="date"
-            className="input"
-            placeholder="Data fim"
-            value={dataFim}
-            onChange={(e) => setDataFim(e.target.value)}
-          />
+          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={urgencia}
+              onChange={(e) => setUrgencia(e.target.checked)}
+              className="rounded"
+            />
+            Apenas urgentes
+          </label>
         </div>
-
-        <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer w-fit">
-          <input
-            type="checkbox"
-            checked={urgencia}
-            onChange={(e) => setUrgencia(e.target.checked)}
-            className="rounded"
-          />
-          Apenas urgentes
-        </label>
       </div>
 
       {loading ? (
@@ -105,7 +88,7 @@ export default function PedidosPage() {
       ) : (
         <div>
           <p className="text-xs text-gray-500 mb-2">{orders.length} pedido(s) encontrado(s)</p>
-          <OrdersTable orders={orders} />
+          <OrdersTable orders={orders} hideDate />
         </div>
       )}
     </div>
